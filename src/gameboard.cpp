@@ -1,3 +1,5 @@
+#include <ncurses.h>
+
 #include "gameboard.h"
 #include "stdio.h"
 
@@ -28,6 +30,21 @@ void GameBoard::print() const
         }
         printf("\n");
     }
+}
+
+void GameBoard::curses_print() const
+{
+    for (unsigned int r = 0; r < rows; r++)
+    {
+        for (unsigned int c = 0; c < cols; c++)
+        {
+            attron(COLOR_PAIR(at(r, c) + 1));
+            mvwaddch(stdscr, r, c, ' ');
+        }
+    }
+    attroff(COLOR_PAIR(1));
+    attroff(COLOR_PAIR(2));
+    refresh();
 }
 
 unsigned int GameBoard::num_neighbors(int r, int c) const
