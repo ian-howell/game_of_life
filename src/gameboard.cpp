@@ -47,7 +47,8 @@ void GameBoard::unset(unsigned int r, unsigned int c)
     if ((i >= 0) && (i < size))
     {
         unsigned int index = i / 8;
-        grid[index] &= (~0 ^ (1 << i));
+        unsigned int offset = i % 8;
+        grid[index] &= ~(1 << offset);
     }
 }
 
