@@ -30,6 +30,31 @@ void GameBoard::print() const
     }
 }
 
+unsigned int GameBoard::num_neighbors(int r, int c) const
+{
+    int offset[8][2] = {
+        {-1, 0},  // UP
+        {+1, 0},  // DOWN
+        {0, +1},  // RIGHT
+        {0, -1},  // LEFT
+        {-1, -1}, // UP-LEFT
+        {-1, +1}, // UP-RIGHT
+        {+1, +1}, // DOWN-RIGHT
+        {+1, -1}, // DOWN-LEFT
+    };
+    int num = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        int newr = r + offset[i][0];
+        int newc = c + offset[i][1];
+        if ((newr >= 0) && (newr < static_cast<int>(rows))
+         && (newc >= 0) && (newc < static_cast<int>(cols))
+         && at(newr, newc) == 1)
+            num++;
+    }
+    return num;
+}
+
 void GameBoard::set(unsigned int r, unsigned int c)
 {
     unsigned int i = r*cols + c;
