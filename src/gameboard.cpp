@@ -119,6 +119,17 @@ void GameBoard::unset(unsigned int r, unsigned int c)
     }
 }
 
+void GameBoard::toggle(unsigned int r, unsigned int c)
+{
+    unsigned int i = r*cols + c;
+    if ((i >= 0) && (i < size))
+    {
+        unsigned int index = i / 8;
+        unsigned int offset = i % 8;
+        grid[index] ^= (1 << offset);
+    }
+}
+
 bool GameBoard::at(unsigned int r, unsigned int c)
 {
     unsigned int i = r*cols + c;

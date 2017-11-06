@@ -48,10 +48,7 @@ int main()
                 {
                     int r = event.y;
                     int c = event.x;
-                    if (board2.at(r, c))
-                        board2.unset(r, c);
-                    else
-                        board2.set(r, c);
+                    board2.toggle(r, c);
                     attron(COLOR_PAIR(1 + board2.at(r, c)));
                     mvaddch(r, c, ' ');
                     attroff(COLOR_PAIR(1 + board2.at(r, c)));
