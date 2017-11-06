@@ -57,6 +57,12 @@ int main()
             case 'p':
                 life(board);
                 break;
+            case 'r':
+                // Refesh with a new board
+                GameBoard tmp(board.get_rows(), board.get_cols());
+                board = tmp;
+                board.curses_print();
+                break;
         }
     }
 
