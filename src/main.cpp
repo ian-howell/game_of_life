@@ -46,23 +46,16 @@ int main()
                 getmouse(&event);
                 if (event.bstate & BUTTON1_PRESSED)
                 {
-                    if (board2.at(event.y, event.x))
-                    {
-                        board2.unset(event.y, event.x);
-                        /* attron(COLOR_PAIR(2)); */
-                        /* mvaddch(event.y, event.x, ' '); */
-                        /* attroff(COLOR_PAIR(2)); */
-                        /* refresh(); */
-                    }
+                    int r = event.y;
+                    int c = event.x;
+                    if (board2.at(r, c))
+                        board2.unset(r, c);
                     else
-                    {
-                        board2.set(event.y, event.x);
-                        /* attron(COLOR_PAIR(2)); */
-                        /* mvaddch(event.y, event.x, ' '); */
-                        /* attroff(COLOR_PAIR(2)); */
-                        /* refresh(); */
-                    }
-                    board2.curses_print();
+                        board2.set(r, c);
+                    attron(COLOR_PAIR(1 + board2.at(r, c)));
+                    mvaddch(r, c, ' ');
+                    attroff(COLOR_PAIR(1 + board2.at(r, c)));
+                    refresh();
                 }
                 break;
             case '1':
