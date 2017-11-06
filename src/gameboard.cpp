@@ -1,4 +1,5 @@
 #include <ncurses.h>
+#include <cstring>
 
 #include "gameboard.h"
 #include "stdio.h"
@@ -8,7 +9,26 @@ GameBoard::GameBoard(const unsigned int rows, const unsigned int cols) :
 {
     int num_chars = size / 8;
     if (size % 8 != 0) num_chars++;
-    grid = new BYTE[num_chars]();
+    grid = new BYTE[num_chars];
+    for (int i = 0; i < num_chars; i++)
+        grid[i] = 0;
+}
+
+GameBoard::GameBoard(const GameBoard& other)
+{
+
+}
+
+const GameBoard& GameBoard::operator=(const GameBoard& rhs)
+{
+    int num_chars = size / 8;
+    if (size % 8 != 0) num_chars++;
+    BYTE* temp = grid;
+    grid = new BYTE[num_chars];
+    for (int i = 0; i < num_chars; i++)
+        grid[i] = rhs.grid[i];
+    delete [] temp;
+    return *this;
 }
 
 GameBoard::~GameBoard()
