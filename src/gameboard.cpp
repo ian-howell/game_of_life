@@ -132,13 +132,7 @@ void GameBoard::toggle(unsigned int r, unsigned int c)
 
 bool GameBoard::at(unsigned int r, unsigned int c)
 {
-    unsigned int i = r*cols + c;
-    if ((i >= 0) && (i < size))
-    {
-        unsigned int index = i / 8;
-        unsigned int offset = i % 8;
-        return (grid[index] >> offset) & 0x01;
-    }
+    return static_cast<const GameBoard&>(*this).at(r, c);
 }
 
 bool GameBoard::at(unsigned int r, unsigned int c) const
