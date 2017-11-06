@@ -12,20 +12,27 @@ GameBoard::GameBoard(const unsigned int rows, const unsigned int cols) :
     grid = new BYTE[num_chars]();
 }
 
-GameBoard::GameBoard(const GameBoard& other)
-{
-
-}
-
-const GameBoard& GameBoard::operator=(const GameBoard& rhs)
+GameBoard::GameBoard(const GameBoard& other) :
+    rows(other.rows), cols(other.cols), size(other.size)
 {
     int num_chars = size / 8;
     if (size % 8 != 0) num_chars++;
-    BYTE* temp = grid;
     grid = new BYTE[num_chars];
     for (int i = 0; i < num_chars; i++)
-        grid[i] = rhs.grid[i];
-    delete [] temp;
+        grid[i] = other.grid[i];
+}
+
+const GameBoard& GameBoard::operator=(GameBoard rhs)
+{
+    if (this != &rhs)
+    {
+        size = rhs.size;
+        rows = rhs.rows;
+        cols = rhs.cols;
+        BYTE* temp = grid;
+        grid = rhs.grid;
+        rhs.grid = temp;
+    }
     return *this;
 }
 

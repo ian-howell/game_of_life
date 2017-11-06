@@ -14,7 +14,7 @@ class GameBoard
         GameBoard(const GameBoard& other);
 
         // Equals assignment
-        const GameBoard& operator=(const GameBoard& rhs);
+        const GameBoard& operator=(GameBoard rhs);
 
         // Destructor
         ~GameBoard();
