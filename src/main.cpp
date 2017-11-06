@@ -6,7 +6,7 @@
 
 #define SECOND 1000000
 
-void life(GameBoard& board1, GameBoard& board2);
+void life(GameBoard& board);
 
 int main()
 {
@@ -27,12 +27,11 @@ int main()
     getmaxyx(stdscr, rows, cols);
     endwin();
 
-    GameBoard board1(rows, cols);
-    GameBoard board2(rows, cols);
+    GameBoard board(rows, cols);
+    board.curses_print();
 
     bool done = false;
     MEVENT event;
-    board1.curses_print();
 
     while (!done)
     {
@@ -48,21 +47,15 @@ int main()
                 {
                     int r = event.y;
                     int c = event.x;
-                    board2.toggle(r, c);
-                    attron(COLOR_PAIR(1 + board2.at(r, c)));
+                    board.toggle(r, c);
+                    attron(COLOR_PAIR(1 + board.at(r, c)));
                     mvaddch(r, c, ' ');
-                    attroff(COLOR_PAIR(1 + board2.at(r, c)));
+                    attroff(COLOR_PAIR(1 + board.at(r, c)));
                     refresh();
                 }
                 break;
-            case '1':
-                board1.curses_print();
-                break;
-            case '2':
-                board2.curses_print();
-                break;
             case 'p':
-                life(board1, board2);
+                life(board);
                 break;
         }
     }
@@ -72,32 +65,33 @@ int main()
     return 0;
 }
 
-void life(GameBoard& board1, GameBoard& board2)
+void life(GameBoard& board)
 {
+    GameBoard reverse(board);
     while (1)
     {
         if (getch() == 'p')
             return;
-        for (unsigned int r = 0; r < board2.get_rows(); r++)
+        for (unsigned int r = 0; r < board.get_rows(); r++)
         {
-            for (unsigned int c = 0; c < board2.get_cols(); c++)
+            for (unsigned int c = 0; c < board.get_cols(); c++)
             {
-                unsigned int n = board2.num_neighbors(r, c);
-                if (board2.at(r, c) == 1)
+                unsigned int n = board.num_neighbors(r, c);
+                if (board.at(r, c) == 1)
                 {
                     if (n < 2)
-                        board1.unset(r, c);
+                        reverse.unset(r, c);
                     else if (n < 4)
-                        board1.set(r, c);
+                        reverse.set(r, c);
                     else
-                        board1.unset(r, c);
+                        reverse.unset(r, c);
                 }
                 else if (n == 3)
-                    board1.set(r, c);
+                    reverse.set(r, c);
             }
         }
-        board1.curses_print();
+        board = reverse;
+        board.curses_print();
         usleep(0.03 * SECOND);
-        board2 = board1;
     }
 }
