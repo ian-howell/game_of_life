@@ -1,13 +1,12 @@
-#include <curses.h>
+#include <ncurses.h>
 #include <stdio.h>
 #include <unistd.h>
 
+#include "gameboard.h"
+
 #define SECOND 1000000
 
-void print_grid(char** grid, int rows, int cols);
-void gridcpy(char** grid1, char** grid2, int rows, int cols);
-void life(char** grid1, char** grid2, int rows, int cols, int length);
-int num_neighbors(char** grid, int r, int c, int maxr, int maxc);
+void life(GameBoard& board1, GameBoard& board2);
 
 int main()
 {
@@ -26,25 +25,15 @@ int main()
     int rows;
     int cols;
     getmaxyx(stdscr, rows, cols);
+    endwin();
 
-    char** grid1 = new char*[rows];
-    char** grid2 = new char*[rows];
-    for (int r = 0; r < rows; r++)
-    {
-        grid1[r] = new char[cols];
-        grid2[r] = new char[cols];
-        for (int c = 0; c < cols; c++)
-        {
-            grid1[r][c] = '.';
-            grid2[r][c] = '.';
-        }
-    }
+    GameBoard board1(rows, cols);
+    GameBoard board2(rows, cols);
 
     bool done = false;
     MEVENT event;
-    print_grid(grid1, rows, cols);
-    gridcpy(grid1, grid2, rows, cols);
-    refresh();
+    board1.curses_print();
+
     while (!done)
     {
         int c = getch();
@@ -57,116 +46,68 @@ int main()
                 getmouse(&event);
                 if (event.bstate & BUTTON1_PRESSED)
                 {
-                    grid2[event.y][event.x] = 'X';
-                    attron(COLOR_PAIR(2));
-                    mvaddch(event.y, event.x, ' ');
-                    attroff(COLOR_PAIR(2));
-                    refresh();
+                    if (board2.at(event.y, event.x))
+                    {
+                        board2.unset(event.y, event.x);
+                        /* attron(COLOR_PAIR(2)); */
+                        /* mvaddch(event.y, event.x, ' '); */
+                        /* attroff(COLOR_PAIR(2)); */
+                        /* refresh(); */
+                    }
+                    else
+                    {
+                        board2.set(event.y, event.x);
+                        /* attron(COLOR_PAIR(2)); */
+                        /* mvaddch(event.y, event.x, ' '); */
+                        /* attroff(COLOR_PAIR(2)); */
+                        /* refresh(); */
+                    }
+                    board2.curses_print();
                 }
                 break;
             case '1':
-                print_grid(grid1, rows, cols);
-                refresh();
+                board1.curses_print();
                 break;
             case '2':
-                print_grid(grid2, rows, cols);
-                refresh();
+                board2.curses_print();
                 break;
             case 'p':
-                life(grid1, grid2, rows, cols, 100);
+                life(board1, board2);
                 break;
         }
     }
 
     endwin();
 
-    printf("%d, %d\n", rows, cols);
-
-    for (int i = 0; i < rows; i++)
-    {
-        delete [] grid1[i];
-        delete [] grid2[i];
-    }
-    delete [] grid1;
-    delete [] grid2;
-
     return 0;
 }
 
-void print_grid(char** grid, int rows, int cols)
+void life(GameBoard& board1, GameBoard& board2)
 {
-    for (int r = 0; r < rows; r++)
-        for (int c = 0; c < cols; c++)
-        {
-            if (grid[r][c] == '.')
-                attron(COLOR_PAIR(1));
-            else
-                attron(COLOR_PAIR(2));
-            mvwaddch(stdscr, r, c, ' ');
-        }
-    attroff(COLOR_PAIR(1));
-    attroff(COLOR_PAIR(2));
-    refresh();
-}
-
-void gridcpy(char** grid1, char** grid2, int rows, int cols)
-{
-    for (int r = 0; r < rows; r++)
-        for (int c = 0; c < cols; c++)
-            grid1[r][c] = grid2[r][c];
-}
-
-void life(char** grid1, char** grid2, int rows, int cols, int length)
-{
-    for (int i = 0; i < length; i++)
+    while (1)
     {
         if (getch() == 'p')
             return;
-        for (int r = 0; r < rows; r++)
+        for (unsigned int r = 0; r < board2.get_rows(); r++)
         {
-            for (int c = 0; c < cols; c++)
+            for (unsigned int c = 0; c < board2.get_cols(); c++)
             {
-                int n = num_neighbors(grid2, r, c, rows, cols);
-                if (grid2[r][c] == 'X')
+                unsigned int n = board2.num_neighbors(r, c);
+                if (board2.at(r, c) == 1)
                 {
                     if (n < 2)
-                        grid1[r][c] = '.';
+                        board1.unset(r, c);
                     else if (n < 4)
-                        grid1[r][c] = 'X';
+                        board1.set(r, c);
                     else
-                        grid1[r][c] = '.';
+                        board1.unset(r, c);
                 }
                 else if (n == 3)
-                    grid1[r][c] = 'X';
+                    board1.set(r, c);
             }
         }
-
-        print_grid(grid1, rows, cols);
-        refresh();
-        usleep(0.05 * SECOND);
-        gridcpy(grid2, grid1, rows, cols);
+        board1.curses_print();
+        usleep(0.03 * SECOND);
+        board2 = board1;
     }
-}
-
-int num_neighbors(char** grid, int r, int c, int maxr, int maxc)
-{
-  int offset[8][2] = {
-    {-1, 0},  // UP
-    {+1, 0},  // DOWN
-    {0, +1},  // RIGHT
-    {0, -1},  // LEFT
-    {-1, -1}, // UP-LEFT
-    {-1, +1}, // UP-RIGHT
-    {+1, +1}, // DOWN-RIGHT
-    {+1, -1}, // DOWN-LEFT
-  };
-    int num = 0;
-    for (int i = 0; i < 8; i++)
-    {
-        int newr = r + offset[i][0];
-        int newc = c + offset[i][1];
-        if ((newr >= 0) && (newr < maxr) && (newc >= 0) && (newc < maxc) && grid[newr][newc] == 'X')
-            num++;
-    }
-    return num;
 }
