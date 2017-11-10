@@ -8,7 +8,7 @@
 
 void life(GameBoard& board);
 
-int main()
+int main(const int argc, const char** argv)
 {
     initscr();
     cbreak();
@@ -25,14 +25,20 @@ int main()
     int rows;
     int cols;
     getmaxyx(stdscr, rows, cols);
-    endwin();
 
-    GameBoard board(rows, cols);
+    // Create the starting board
+    GameBoard* original_board = nullptr;
+    if (argc == 1)
+        original_board = new GameBoard(rows, cols);
+    else
+        original_board = new GameBoard(argv[1], rows, cols);
+
+    // Create the _actual_ board using the original as a blueprint
+    GameBoard board(*original_board);
     board.curses_print();
 
     bool done = false;
     MEVENT event;
-
     while (!done)
     {
         int c = getch();
@@ -58,14 +64,15 @@ int main()
                 life(board);
                 break;
             case 'r':
-                // Refesh with a new board
-                GameBoard tmp(board.get_rows(), board.get_cols());
+                // Refesh with the original board
+                GameBoard tmp(*original_board);
                 board = tmp;
                 board.curses_print();
                 break;
         }
     }
 
+    delete original_board;
     endwin();
 
     return 0;

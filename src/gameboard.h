@@ -1,6 +1,8 @@
 #ifndef GAMEBOARD_H
 #define GAMEBOARD_H
 
+#include <string>
+
 class GameBoard
 {
     public:
@@ -9,6 +11,10 @@ class GameBoard
 
         // Constructor taking number fo rows and columns
         GameBoard(const unsigned int rows, const unsigned int cols);
+
+        // Constructor taking a file with the initial state
+        GameBoard(std::string filename, const unsigned int rows,
+                const unsigned int cols);
 
         // Copy constructor
         GameBoard(const GameBoard& other);

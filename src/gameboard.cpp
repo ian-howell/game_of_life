@@ -1,5 +1,5 @@
+#include <fstream>
 #include <ncurses.h>
-#include <cstring>
 
 #include "gameboard.h"
 #include "stdio.h"
@@ -10,6 +10,42 @@ GameBoard::GameBoard(const unsigned int rows, const unsigned int cols) :
     int num_chars = size / 8;
     if (size % 8 != 0) num_chars++;
     grid = new BYTE[num_chars]();
+}
+
+GameBoard::GameBoard(std::string filename, const unsigned int rows,
+        const unsigned int cols) :
+    rows(rows), cols(cols), size(rows * cols)
+{
+    std::ifstream fin;
+    // TODO: Exception handling here
+    fin.open(filename);
+
+    // Read start position of the grid from the file
+    int start_row;
+    int start_col;
+    int num_rows;
+    int num_cols;
+    fin >> start_row >> start_col >> num_rows >> num_cols;
+
+    // Eat the newline
+    fin.ignore(100, '\n');
+
+    // Set up the grid
+    int num_chars = size / 8;
+    if (size % 8 != 0) num_chars++;
+    grid = new BYTE[num_chars]();
+
+    std::string line;
+    for (int r = 0; r < num_rows; r++)
+    {
+        getline(fin, line);
+        for (int c = 0; c < num_cols; c++)
+        {
+            if (line[c] == 'X')
+                set(r + start_row, c + start_col);
+        }
+    }
+    fin.close();
 }
 
 GameBoard::GameBoard(const GameBoard& other) :
